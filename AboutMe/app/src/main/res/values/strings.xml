@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">AboutMe</string>
+    <string name="name">LDG</string>
+    <string name="yellow_star">Yellow_star</string>
+    <string name="bio">
+        \n\n When you try your best but you don\'t succeed
+        \n\nWhen you get what you want but not what you need
+        \n\nWhen you feel so tired but you can't sleep
+        \nStuck in reverse
+    </string>
+    <string name="what_is_you">what is you nickname</string>
+    <string name="done">Done</string>
+</resources>
