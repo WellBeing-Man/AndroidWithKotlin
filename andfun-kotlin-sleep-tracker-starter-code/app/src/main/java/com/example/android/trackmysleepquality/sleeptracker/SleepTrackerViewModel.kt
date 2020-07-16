@@ -19,6 +19,7 @@ package com.example.android.trackmysleepquality.sleeptracker
 import android.app.Application
 
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
@@ -38,6 +39,7 @@ class SleepTrackerViewModel(
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
+        uiScope.cancel()
     }
 
     private val uiScope= CoroutineScope(Dispatchers.Main+viewModelJob)
@@ -46,8 +48,34 @@ class SleepTrackerViewModel(
     private val nights=database.getAllNights()
     val nightString=Transformations.map(nights){nights
     -> formatNights(nights,application.resources)}
+
+    val startButtonVisible=Transformations.map(tonight
+    ){
+        null==it
+    }
+    val stopButtonVisible=Transformations.map(tonight){
+        null!=it
+    }
+    val clearButtonVisible=Transformations.map(nights){
+        it?.isNotEmpty()
+    }
+    private val _navigateToSleepQuality=MutableLiveData<SleepNight>()
+    val navigateSleepNight:LiveData<SleepNight>
+        get() = _navigateToSleepQuality
+
+    private val _showSnackBarEvent=MutableLiveData<Boolean?>()
+    val showSnackbarEvent:LiveData<Boolean?>
+        get() = _showSnackBarEvent
+
+    fun doneSnackBarEvent(){
+        _showSnackBarEvent.value=false
+    }
     init {
         initializeTonight()
+    }
+
+    fun doneNavigating(){
+        _navigateToSleepQuality.value=null
     }
 
     private  fun initializeTonight() {
@@ -72,6 +100,7 @@ class SleepTrackerViewModel(
             val newNight=SleepNight()
               insert(newNight)
             tonight.value=getTonightDatabase()
+            _showSnackBarEvent.value=true
         }
     }
 
@@ -87,6 +116,7 @@ class SleepTrackerViewModel(
             val oldNight=tonight.value?: return@launch
             oldNight.endTimeMilli=System.currentTimeMillis()
             update(oldNight)
+            _navigateToSleepQuality.value=oldNight
         }
     }
 
